@@ -67,6 +67,7 @@ def analyze_response(response, headers: dict[str, str], cookies: dict[str, str])
     artist = {}
     artist['name'] = soup.h2.text.strip()
     artist['alias'] = re.split(r';', soup.h3.text.strip())
+    artist['url'] = response.url
 
     #further analyze the introduction block
     artist_intro_block = soup.find(class_="n-artdesc")
