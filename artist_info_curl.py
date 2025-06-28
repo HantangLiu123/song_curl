@@ -22,7 +22,7 @@ def get_all_artist_ids() -> list[int]:
     
     return id_list
 
-def get_image(image_url: str, headers: dict[str, str], cookies: dict[str, str], name: str) -> None:
+def get_image(image_url: str, headers: dict[str, str], cookies: dict[str, str], id: int) -> None:
 
     """Getting the image using the url
 
@@ -32,7 +32,7 @@ def get_image(image_url: str, headers: dict[str, str], cookies: dict[str, str], 
         image_url(str): the url used to make the request
         headers(dict[str, str]): the headers for the request
         cookies(dict[str, str]): the cookies for the request
-        name(str): the artist's name
+        id(int): the id of the artist
 
     Returns:
         None
@@ -41,11 +41,11 @@ def get_image(image_url: str, headers: dict[str, str], cookies: dict[str, str], 
     response = requests.get(image_url, headers=headers, cookies=cookies)
     image = response.content
     INFO_OUT_DIR = 'C:/Chris Liu/清华/25暑期/python-course/song_curl/saved_info/artist_info/artist_images'
-    OUT_PATH = f"{INFO_OUT_DIR}/{name}.jpg"
+    OUT_PATH = f"{INFO_OUT_DIR}/artist{id}.jpg"
     with open(OUT_PATH, "wb") as f:
         f.write(image)
 
-def analyze_response(response, headers: dict[str, str], cookies: dict[str, str]) -> None:
+def analyze_response(response, headers: dict[str, str], cookies: dict[str, str], id: int) -> None:
 
     """Analyze a response
     
@@ -56,6 +56,7 @@ def analyze_response(response, headers: dict[str, str], cookies: dict[str, str])
         response: the response of the artist page request
         headers(dict[str, str]): headers using by the request
         cookies(dict[str, str]): cookies using by the request
+        id: the id of the artist
     
     Returns:
         None
@@ -68,6 +69,7 @@ def analyze_response(response, headers: dict[str, str], cookies: dict[str, str])
     artist['name'] = soup.h2.text.strip()
     artist['alias'] = re.split(r';', soup.h3.text.strip())
     artist['url'] = response.url
+    artist['id'] = id
 
     #further analyze the introduction block
     artist_intro_block = soup.find(class_="n-artdesc")
@@ -96,14 +98,14 @@ def analyze_response(response, headers: dict[str, str], cookies: dict[str, str])
 
     #store info found
     INFO_OUT_DIR = 'C:/Chris Liu/清华/25暑期/python-course/song_curl/saved_info/artist_info/artist_intro'
-    OUT_PATH = f"{INFO_OUT_DIR}/{artist['name']}.json"
+    OUT_PATH = f"{INFO_OUT_DIR}/artist{id}.json"
     with open(OUT_PATH, "w", encoding='utf-8') as f:
         json.dump(artist, f, indent=4, sort_keys=False, ensure_ascii=False)
 
     #get the image after a small break
     time.sleep(random.random() + 1)
     image_url = soup.find_all("img")[0]['src']
-    get_image(image_url, headers, cookies, artist['name'])
+    get_image(image_url, headers, cookies, id)
 
 def curl_info():
     #prepair url, headers, cookies, and ids for requests
@@ -142,7 +144,7 @@ def curl_info():
     for id in id_list:
         response = requests.get(url=ARTIST_PAGE_URL, headers=headers, cookies=cookies, 
                                 params={"id": id})
-        analyze_response(response, headers, cookies)
+        analyze_response(response, headers, cookies, id)
         time.sleep(random.random() + 1)
         
 
