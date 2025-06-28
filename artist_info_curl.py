@@ -101,8 +101,8 @@ def analyze_response(response, headers: dict[str, str], cookies: dict[str, str])
 
     #get the image after a small break
     time.sleep(random.random() + 1)
-    #image_url = soup.find_all("img")[0]['src']
-    #get_image(image_url, headers, cookies, artist['name'])
+    image_url = soup.find_all("img")[0]['src']
+    get_image(image_url, headers, cookies, artist['name'])
 
 def curl_info():
     #prepair url, headers, cookies, and ids for requests
