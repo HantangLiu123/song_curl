@@ -1,3 +1,4 @@
+import requests
 from bs4 import BeautifulSoup
 import re
 import time
@@ -7,9 +8,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException
 from artist_info_curl import get_all_artist_ids
 from requests_get import RequestsGet
-from store import ARTIST_SONG_IDS_PATH
+from store import ARTIST_SONG_IDS_PATH, SONG_IMAGE_PATH, SONG_INTRO_PATH
 
 def construct_song_id_list(song_url_list: list[str]) -> list[int]:
     
@@ -21,18 +23,98 @@ def construct_song_id_list(song_url_list: list[str]) -> list[int]:
         id_list.append(int(id))
     return id_list
 
-def get_songs_info(tool: RequestsGet, song_url_list: list[str]):
-    pass
+def get_songs_info(tool: RequestsGet, driver: webdriver.Chrome, song_url_list: list[str]):
+    #preventing same song appear twice
+    song_id_set = set()
+    for url in song_url_list:
+        song_info = {}
 
-def curl_song_through_artists(tool: RequestsGet):
+        #getting the id from the url
+        _, song_id = re.split(r'=', url, maxsplit=1)
+        if song_id in song_id_set:
+            continue
+        song_id_set.add(song_id)
+        song_info['id'] = song_id
+        song_info['url'] = f"https://music.163.com{url}"
+
+        #getting song name, artists information from requests
+        response = tool.requests_get(song_info['url'])
+        response.raise_for_status()
+        song_soup = BeautifulSoup(response.text, 'lxml')
+
+        #find the song name and alias
+        song_title = song_soup.title
+        if re.search(r'（.+）', song_title.text) is not None:
+            song_info['name'] = re.split(r'（', song_title.text, maxsplit=1)[0].strip()
+            song_alias = re.search(r'（.+）', song_title.text)
+            song_alias = song_alias.group(0)
+            song_info['alias'] = song_alias[1:len(song_alias) - 1]
+        else:
+            song_info['name'] = re.split(r'-', song_title.text)[0].strip()
+
+        #artists' names and ids
+        artist_tags = song_soup.find_all(href=re.compile(r'^/artist\?id=[0-9]+$'), class_="s-fc7")
+        artist_list = []
+        artist_id_list = []
+        for tag in artist_tags:
+            artist_list.append(tag.text)
+            artist_href = tag['href']
+            _, artist_id = re.split(r'=', artist_href, maxsplit=1)
+            artist_id_list.append(artist_id)
+        song_info['artist list'] = artist_list
+        song_info['artist id list'] = artist_id_list
+
+        #getting the lyrics and picture with webdriver
+        driver.get(song_info['url'])
+        wait = WebDriverWait(driver, 15) #driver will wait for at most 15s for any movement or raise errors
+
+        #change to iframe 
+        iframe = wait.until(EC.presence_of_element_located((By.TAG_NAME, "iframe")))
+        driver.switch_to.frame(iframe)
+
+        #get the image
+        image = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'j-img')))
+        img_url = image.get_attribute('src')
+        IMG_PATH = f'{SONG_IMAGE_PATH}/song{song_id}.jpg'
+        response = requests.get(img_url, stream=True)
+        with open(IMG_PATH, "wb") as f:
+            for chunck in response.iter_content(chunk_size=8192):
+                f.write(chunck)
+        print(f"song{song_id}'s image saved")
+
+        #click the "展开" button for lyrics
+        try:
+            more = wait.until(EC.element_to_be_clickable((By.XPATH, "//*[text()='展开']")))
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", more)
+            time.sleep(0.5)
+            more.click()
+        except TimeoutException:
+            print('No "展开" button')
+        
+        #get the lyrcis
+        element = driver.find_element(By.ID, "lyric-content")
+        lyrics = element.text
+        song_info['lyrics'] = lyrics
+
+        #store the song
+        INTRO_PATH = f"{SONG_INTRO_PATH}/song{song_id}.json"
+        with open(INTRO_PATH, 'w', encoding='utf-8') as f:
+            json.dump(song_info, f, ensure_ascii=False, sort_keys=False, indent=4)
+        print(f"song{song_id}'s intro is saved")
+
+def curl_song_through_artists(tool: RequestsGet, driver: webdriver.Chrome):
 
     """a function getting songs from known artists"""
 
     ARTIST_SONGPAGE_URL = "https://music.163.com/artist"
     artist_id_list = get_all_artist_ids()
+    flag = False
     for id in artist_id_list:
+
+        #get the artist's songs page
         response = tool.requests_get(url=ARTIST_SONGPAGE_URL, params={'id': id})
-        song_list_soup = BeautifulSoup(response.text)
+        response.raise_for_status()
+        song_list_soup = BeautifulSoup(response.text, 'lxml')
         song_list = song_list_soup.find("ul", class_="f-hide")
         song_url_list = [song.a['href'] for song in song_list]
         #get first 25 songs
@@ -42,10 +124,11 @@ def curl_song_through_artists(tool: RequestsGet):
         song_id_list = construct_song_id_list(song_url_list)
         STORE_PATH = f'{ARTIST_SONG_IDS_PATH}/artist{id}songs.json'
         with open(STORE_PATH, "w", encoding='utf-8') as f:
-            json.dump(song_id_list, f, sort_keys=False)
+            json.dump(song_id_list, f, sort_keys=False, indent=4)
+        print(f"artist{id}'s songs' ids saved")
         
         #get and store the songs info
-        get_songs_info(tool, song_url_list)
+        get_songs_info(tool, driver, song_url_list)
 
 if __name__ == "__main__":
     #prepare for requests
@@ -76,4 +159,13 @@ if __name__ == "__main__":
             "WM_NIKE": "9ca17ae2e6ffcda170e2e6eed4b16f8c95fb96c54aae9a8fb7c44f829e9ab1d66af7b0aa8eeb4990ae009bd62af0fea7c3b92a89bf8588b67d87ecbcbae23d89ad8497ed6197bea6a5c23cb69ea4afaa7abbe78cb1b221f5910090f25b899e9f91db40b594a1b0c440b2f5bbcccd3382978dadfc4ea89e9c8bb34ff39fe59bd5639098818bf533b89baba5b55da8bab6b7c47fae8881a8e86a8b9b84a3b145a792acb7db258cb4b696ed34ad8ebd86dc46ae9e9fb9d837e2a3"
         }
     )
-    pass
+    
+    #prepare selenium driver without screen
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument('--enable-javascript')
+    driver = webdriver.Chrome(options=chrome_options)
+
+    curl_song_through_artists(tool, driver)
+    driver.quit()

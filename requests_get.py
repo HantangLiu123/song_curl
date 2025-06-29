@@ -12,5 +12,5 @@ class RequestsGet:
         self.headers = headers
         self.cookies = cookies
 
-    def requests_get(self, url: str, params: dict):
+    def requests_get(self, url: str, params: dict | None = None):
         return requests.get(url, headers=self.headers, cookies=self.cookies, params=params)
