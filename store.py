@@ -1,0 +1,1 @@
+ARTIST_SONG_IDS_PATH = "C:/Chris Liu/清华/25暑期/python-course/song_curl/saved_info/artist_song_ids"
