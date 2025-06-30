@@ -15,7 +15,16 @@ from store import ARTIST_SONG_IDS_PATH, SONG_IMAGE_PATH, SONG_INTRO_PATH
 
 def construct_song_id_list(song_url_list: list[str]) -> list[int]:
     
-    """function that constructs songs' id list from their urls"""
+    """function that constructs songs' id list from their urls
+    
+    This function gives the song id list using the song url list
+
+    Args:
+        song_utl_list (list[str]): the list of song urls
+
+    Returns:
+        the song id list (list[int])
+    """
     
     id_list = []
     for url in song_url_list:
@@ -24,6 +33,21 @@ def construct_song_id_list(song_url_list: list[str]) -> list[int]:
     return id_list
 
 def get_songs_info(tool: RequestsGet, driver: webdriver.Chrome, song_url_list: list[str]):
+
+    """A function gets song info using the tools and url list in the input.
+
+    This function stores the song info (picture and intro) locally by the RequestsGet tool, 
+    driver, and song url list in the args.
+
+    Args:
+        tool (RequestsGet): a tool contains the headers and cookies that will be used
+        driver (webdriver.Chrome): a driver constructed by selenium
+        song_url_list (list[str]): a list contains all songs' urls needed
+
+    Returns:
+        None
+    """
+
     #preventing same song appear twice
     song_id_set = set()
     for url in song_url_list:
@@ -104,11 +128,25 @@ def get_songs_info(tool: RequestsGet, driver: webdriver.Chrome, song_url_list: l
 
 def curl_song_through_artists(tool: RequestsGet, driver: webdriver.Chrome):
 
-    """a function getting songs from known artists"""
+    """a function getting songs from known artists.
+    
+    This function traverses through the artist song page in the artist id list.
+    If the artist has more than 25 songs on that page, this function will retrieve
+    the first 25 songs' ids and urls. If the artist has less than or equal to 25 songs
+    on that page, this function will retrieve all songs' ids and urls. Then, it will
+    store the info locally.
+
+    Args:
+        tool (RequestsGet): a tool contains headers and cookies for the get requests
+        driver (webdriver.Chrome): a driver constructed with selenium, which will be
+            used in the function get_songs_info(...)
+
+    Returns:
+        None
+    """
 
     ARTIST_SONGPAGE_URL = "https://music.163.com/artist"
     artist_id_list = get_all_artist_ids()
-    flag = False
     for id in artist_id_list:
 
         #get the artist's songs page

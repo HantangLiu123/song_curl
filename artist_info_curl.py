@@ -28,7 +28,7 @@ def get_image(image_url: str, headers: dict[str, str], cookies: dict[str, str], 
 
     Getting the image from the url and storing in the local folder
 
-    Params:
+    Args:
         image_url(str): the url used to make the request
         headers(dict[str, str]): the headers for the request
         cookies(dict[str, str]): the cookies for the request
@@ -52,7 +52,7 @@ def analyze_response(response, headers: dict[str, str], cookies: dict[str, str],
     Analyze the response after getting the artist page, extract related info
     (e.g. name, alias, intro, etc.) and store them in a local json file
 
-    Params:
+    Args:
         response: the response of the artist page request
         headers(dict[str, str]): headers using by the request
         cookies(dict[str, str]): cookies using by the request
@@ -108,6 +108,13 @@ def analyze_response(response, headers: dict[str, str], cookies: dict[str, str],
     get_image(image_url, headers, cookies, id)
 
 def curl_info():
+
+    """A function that gets info of artists in the artist_hrefs.
+    
+    This function gets the urls by analyzing artist_hrefs.json. Then, it sends get requests
+    to those urls and store the artist info locally.
+    """
+
     #prepair url, headers, cookies, and ids for requests
     ARTIST_PAGE_URL = "https://music.163.com/artist/desc"
 
