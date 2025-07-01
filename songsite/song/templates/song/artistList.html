@@ -1,0 +1,9 @@
+{% if all_artist_list %}
+    <ul>
+        {% for artist in all_artist_list %}
+            <li><a href="{% url 'song:artist_detail' song.id %}">{{ artist.name }}</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No artists</p>
+{% endif %}

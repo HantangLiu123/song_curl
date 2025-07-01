@@ -1,0 +1,9 @@
+{% if all_song_list %}
+    <ul>
+        {% for song in all_song_list %}
+            <li><a href="{% url 'song:song_detail' song.id %}">{{ song.name }}</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No songs</p>
+{% endif %}
