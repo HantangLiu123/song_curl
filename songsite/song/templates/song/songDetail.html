@@ -2,7 +2,7 @@
 <p>歌手：</p>
 <ul>
     {% for artist in song.artist.all %}
-        <li><a href="url {% url 'song:artist_detail' artist.id %}">{{ artist.name }}</a></li>
+        <li><a href="{% url 'song:artist_detail' artist.id %}">{{ artist.name }}</a></li>
     {% endfor %}
 </ul>
 <p><a href="{{ song.original_url }}">原歌曲网站</a></p>
@@ -15,7 +15,8 @@
             <legend><h4>{{ comment.user }}</h4></legend>
             <p>发布时间：{{ comment.pub_date }}</p>
             <p>内容：{{ comment.comment_text }}</p>
-            <form type="post" action="{% url 'song:delete_comment' comment.id %}">
+            <form method="post" action="{% url 'song:delete_comment' comment.id %}">
+                {% csrf_token %}
                 <input type="hidden" name="song_id" value="{{ song.id }}">
                 <input type="submit" value="删除">
             </form>

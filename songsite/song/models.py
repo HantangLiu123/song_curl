@@ -4,17 +4,17 @@ from django.db import models
 
 class Artist(models.Model):
     name = models.CharField(max_length=50)
-    alias = models.CharField(max_length=50, null=True)
+    alias = models.CharField(max_length=50, null=True, blank=True)
     original_id = models.CharField(max_length=15) # id in the original website
     intro = models.CharField(max_length=2000)
-    history = models.CharField(max_length=10000, null=True)
-    master_work = models.JSONField(default=list, null=True)
-    milestones = models.JSONField(default=list, null=True)
+    history = models.CharField(max_length=10000, null=True, blank=True)
+    master_work = models.JSONField(default=list, null=True, blank=True)
+    milestones = models.JSONField(default=list, null=True, blank=True)
     original_url = models.CharField(max_length=50)
 
 class Song(models.Model):
     name = models.CharField(max_length=50)
-    alias = models.CharField(max_length=50, null=True)
+    alias = models.CharField(max_length=50, null=True, blank=True)
     original_id = models.CharField(max_length=15)
     original_url = models.CharField(max_length=50)
     artist = models.ManyToManyField('Artist')

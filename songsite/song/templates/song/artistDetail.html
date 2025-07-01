@@ -1,0 +1,18 @@
+<h1>{{ artist.name }}</h1>
+<h3>又名：{{ artist.alias }}</h3>
+<fieldset>
+    <legend><h2>歌手简介</h2></legend>
+    <p>{{ artist.intro }}</p>
+</fieldset>
+<fieldset>
+    <legend><h2>站内歌曲</h2></legend>
+    {% if artist.song_set.all %}
+        <ul>
+            {% for song in artist.song_set.all %}
+                <li><a href="{% url 'song:song_detail' song.id %}">{{ song.name }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>暂无歌曲</p>
+    {% endif %}
+</fieldset>

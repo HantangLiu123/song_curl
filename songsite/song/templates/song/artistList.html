@@ -1,7 +1,7 @@
 {% if all_artists_list %}
     <ul>
         {% for artist in all_artists_list %}
-            <li><a href="{% url 'song:artist_detail' song.id %}">{{ artist.name }}</a></li>
+            <li><a href="{% url 'song:artist_detail' artist.id %}">{{ artist.name }}</a></li>
         {% endfor %}
     </ul>
 {% else %}
