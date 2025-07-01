@@ -39,7 +39,7 @@ def comment(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
     data = request.POST
     user = data['user']
-    comment_text = data['text']
+    comment_text = data['comment_text']
     comment_obj = Comment(song=song, user=user, comment_text=comment_text)
     try:
         comment_obj.full_clean()
@@ -55,3 +55,9 @@ def comment(request, song_id):
     else:
         comment_obj.save()
         return HttpResponseRedirect(reverse('song:song_detail', args=(song.id, )))
+    
+def del_comment(request, comment_id):
+    comment = get_object_or_404(Comment, pk=comment_id)
+    song_id = int(request.POST['song_id'])
+    comment.delete()
+    return HttpResponseRedirect(reverse('song:song_detail', args=(song_id, )))

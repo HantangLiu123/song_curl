@@ -24,4 +24,4 @@ class Comment(models.Model):
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
     user = models.CharField(max_length=50)
     comment_text = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('发布时间')
+    pub_date = models.DateTimeField('发布时间', auto_now_add=True)

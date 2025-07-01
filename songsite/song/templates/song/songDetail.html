@@ -6,4 +6,30 @@
     {% endfor %}
 </ul>
 <p><a href="{{ song.original_url }}">原歌曲网站</a></p>
-<p>歌词：<br>{{ song.lyrics }}</p>
+<p>歌词：</p>
+{{ song.lyrics|linebreaks }}
+<p>评论：</p>
+{% if song.comment_set.all %}
+    {% for comment in song.comment_set.all %}
+        <fieldset>
+            <legend><h4>{{ comment.user }}</h4></legend>
+            <p>发布时间：{{ comment.pub_date }}</p>
+            <p>内容：{{ comment.comment_text }}</p>
+            <form type="post" action="{% url 'song:delete_comment' comment.id %}">
+                <input type="hidden" name="song_id" value="{{ song.id }}">
+                <input type="submit" value="删除">
+            </form>
+        </fieldset>
+    {% endfor %}
+{% else %}
+<p>暂无评论</p>
+{% endif %}
+<form action="{% url 'song:song_comment' song.id %}" method="post">
+    {% csrf_token %}
+    {% if error_message %}
+        {{ error_message }}
+    {% endif %}
+    用户名: <input type="text" name="user">
+    内容：<input type="text" name="comment_text">
+    <input type="submit" value="提交">
+</form>
