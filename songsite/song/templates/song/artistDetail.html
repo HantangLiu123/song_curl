@@ -16,7 +16,29 @@
 {% if artist.master_work %}
     <fieldset>
         <legend><h2>代表作品</h2></legend>
-        
+        {% if artist.master_work|length == 1 %}
+            <p>{{ artist.master_work.0 }}</p>
+        {% else %}
+            <ul>
+                {% for work in artist.master_work %}
+                    <li>{{ work }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </fieldset>
+{% endif %}
+{% if artist.milestones %}
+    <fieldset>
+        <legend><h2>里程碑</h2></legend>
+        {% if artist.milestones|length == 1 %}
+            <p>{{ artist.milestones.0 }}</p>
+        {% else %}
+            <ul>
+                {% for milestone in artist.milestones %}
+                    <li>{{ milestone }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </fieldset>
 {% endif %}
 <fieldset>

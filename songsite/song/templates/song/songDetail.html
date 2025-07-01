@@ -1,4 +1,7 @@
 <h1>{{ song.name }}</h1>
+{% if song.alias %}
+    <h3>又名{{ song.alias }}</h3>
+{% endif %}
 <p>歌手：</p>
 <ul>
     {% for artist in song.artist.all %}
