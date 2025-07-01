@@ -1,9 +1,24 @@
 <h1>{{ artist.name }}</h1>
-<h3>又名：{{ artist.alias }}</h3>
+{% if artist.alias %}
+    <h3>又名：{{ artist.alias }}</h3>
+{% endif %}
+<p><a href="{{ artist.original_url }}"></a></p>
 <fieldset>
     <legend><h2>歌手简介</h2></legend>
     <p>{{ artist.intro }}</p>
 </fieldset>
+{% if artist.history %}
+    <fieldset>
+        <legend><h2>演艺生涯</h2></legend>
+        <p>{{ artist.history }}</p>
+    </fieldset>
+{% endif %}
+{% if artist.master_work %}
+    <fieldset>
+        <legend><h2>代表作品</h2></legend>
+        
+    </fieldset>
+{% endif %}
 <fieldset>
     <legend><h2>站内歌曲</h2></legend>
     {% if artist.song_set.all %}
