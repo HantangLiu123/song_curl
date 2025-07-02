@@ -1,3 +1,7 @@
+<div class="navigation">
+    <a href="{% url 'song:song_list' %}">歌曲</a>
+    <a href="{% url 'song:artist_list' %}">歌手</a>
+</div>
 {% if all_songs_list %}
     <ul>
         {% for song in all_songs_list %}

@@ -1,3 +1,7 @@
+<div class="navigation">
+    <a href="{% url 'song:song_list' %}">歌曲</a>
+    <a href="{% url 'song:artist_list' %}">歌手</a>
+</div>
 <h1>{{ song.name }}</h1>
 {% if song.alias %}
     <h3>又名{{ song.alias }}</h3>
@@ -13,6 +17,10 @@
     {% endfor %}
 </ul>
 <p><a href="{{ song.original_url }}">原歌曲网站</a></p>
+{% load static %}
+{% with 'song/images/song'|add:song.original_id|add:'.jpg' as image_path %}
+    <img src="{% static image_path %}" alt="歌曲图片">
+{% endwith %}
 <p>歌词：</p>
 {{ song.lyrics|safe }}
 <p>评论：</p>
