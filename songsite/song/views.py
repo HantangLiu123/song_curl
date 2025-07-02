@@ -13,23 +13,31 @@ class SongList(generic.ListView):
     model = Song
     template_name = 'song/songList.html'
     context_object_name = 'all_songs_list'
-    #paginate_by = 25
+    paginate_by = 25
 
     def get_queryset(self) -> QuerySet[Any]:
         return Song.objects.all()
     
-class SongDetail(generic.DetailView):
-    model = Song
-    template_name = 'song/songDetail.html'
+def show_song_detail(request, song_id):
+    song = get_object_or_404(Song, pk=song_id)
+    comments = song.comment_set.order_by('-pub_date')
+    return render(
+        request,
+        'song/songDetail.html',
+        {
+            'song': song,
+            'comments': comments
+        },
+    )
     
 class ArtistList(generic.ListView):
     model = Artist
     template_name = 'song/artistList.html'
     context_object_name = 'all_artists_list'
-    #paginate_by = 25
+    paginate_by = 25
 
     def get_queryset(self) -> QuerySet[Any]:
-        return Artist.objects.all()
+        return Artist.objects.filter(original_url__isnull=False)
 
 class ArtistDetail(generic.DetailView):
     model = Artist
@@ -41,6 +49,7 @@ def comment(request, song_id):
     user = data['user']
     comment_text = data['comment_text']
     comment_obj = Comment(song=song, user=user, comment_text=comment_text)
+    comments = song.comment_set.order_by('-pub_date')
     try:
         comment_obj.full_clean()
     except ValidationError:
@@ -49,6 +58,7 @@ def comment(request, song_id):
             'song/songDetail.html',
             {
                 'song': song,
+                'comments': comments,
                 'error_message': '请再次检查您已填入了用户名和评论',
             }
         )

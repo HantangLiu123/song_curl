@@ -5,15 +5,19 @@
 <p>歌手：</p>
 <ul>
     {% for artist in song.artist.all %}
-        <li><a href="{% url 'song:artist_detail' artist.id %}">{{ artist.name }}</a></li>
+        {% if artist.original_url %}
+            <li><a href="{% url 'song:artist_detail' artist.id %}">{{ artist.name }}</a></li>
+        {% else %}
+            <li>{{ artist.name }}</li>
+        {% endif %}
     {% endfor %}
 </ul>
 <p><a href="{{ song.original_url }}">原歌曲网站</a></p>
 <p>歌词：</p>
-{{ song.lyrics|linebreaks }}
+{{ song.lyrics|safe }}
 <p>评论：</p>
-{% if song.comment_set.all %}
-    {% for comment in song.comment_set.all %}
+{% if comments %}
+    {% for comment in comments %}
         <fieldset>
             <legend><h4>{{ comment.user }}</h4></legend>
             <p>发布时间：{{ comment.pub_date }}</p>

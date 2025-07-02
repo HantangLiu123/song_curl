@@ -7,3 +7,33 @@
 {% else %}
     <p>No songs</p>
 {% endif %}
+
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; 首页</a>
+            <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">下一页</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">尾页 &raquo;</a>
+        {% endif %}
+
+        <form method="get">
+            <input
+                type="number"
+                name="page"
+                min="1"
+                max="{{ page_obj.pagination.num_pages }}"
+                placeholder="页码"
+                required
+            >
+            <button type="submit">跳转</button>
+        </form>
+    </span>
+</div>
