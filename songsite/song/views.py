@@ -13,7 +13,7 @@ class SongList(generic.ListView):
     model = Song
     template_name = 'song/songList.html'
     context_object_name = 'all_songs_list'
-    paginate_by = 25
+    paginate_by = 20
 
     def get_queryset(self) -> QuerySet[Any]:
         return Song.objects.all()
@@ -34,7 +34,7 @@ class ArtistList(generic.ListView):
     model = Artist
     template_name = 'song/artistList.html'
     context_object_name = 'all_artists_list'
-    paginate_by = 25
+    paginate_by = 20
 
     def get_queryset(self) -> QuerySet[Any]:
         return Artist.objects.filter(original_url__isnull=False)
