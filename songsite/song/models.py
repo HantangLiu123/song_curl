@@ -25,3 +25,21 @@ class Comment(models.Model):
     user = models.CharField(max_length=50)
     comment_text = models.CharField(max_length=200)
     pub_date = models.DateTimeField('发布时间', auto_now_add=True)
+
+class SongSegment(models.Model):
+    token = models.CharField(max_length=20, unique=True)
+    df = models.PositiveIntegerField()
+
+class SongIndex(models.Model):
+    article_id = models.PositiveIntegerField()
+    tf = models.PositiveIntegerField()
+    song_segment = models.ForeignKey(SongSegment, on_delete=models.CASCADE)
+
+class ArtistSegment(models.Model):
+    token = models.CharField(max_length=20, unique=True)
+    df = models.PositiveIntegerField()
+
+class ArtistIndex(models.Model):
+    article_id = models.PositiveIntegerField()
+    tf = models.PositiveIntegerField()
+    artist_segment = models.ForeignKey(ArtistSegment, on_delete=models.CASCADE)
