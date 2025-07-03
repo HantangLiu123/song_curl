@@ -16,7 +16,8 @@ class Command(BaseCommand):
             self.stdout.write('clearing existing indexes')
             SongSegment.objects.all().delete()
             ArtistSegment.objects.all().delete()
-
+        self.create_song_segments()
+        self.create_artist_segments()
         
     def create_song_segments(self):
         songs = Song.objects.all()
@@ -76,7 +77,7 @@ class Command(BaseCommand):
             artist_segments = self.segments_in_artist(artist)
             artist_segments_info = self.analyze_segments(artist_segments)
             for segment in artist_segments_info:
-                sej_obj, created = ArtistSegment.objects.get_or_create(
+                seg_obj, created = ArtistSegment.objects.get_or_create(
                     token=segment,
                     defaults={'df': 1}
                 )
@@ -84,10 +85,10 @@ class Command(BaseCommand):
                     self.stdout.write(f"new artist segment {segment} created")
                 else:
                     self.stdout.write(f"adding df for artist segment {segment}")
-                    sej_obj.df += 1
-                    sej_obj.save()
+                    seg_obj.df += 1
+                    seg_obj.save()
 
-                sej_obj.artistindex_set.create(article_id=artist.id, tf=artist_segments_info[segment])
+                seg_obj.artistindex_set.create(article_id=artist.id, tf=artist_segments_info[segment])
 
     def segments_in_artist(self, artist: Artist) -> list[str]:
         segments = []
