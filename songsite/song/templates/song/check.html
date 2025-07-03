@@ -1,0 +1,25 @@
+<h1>搜索一下</h1>
+<form method="get" action="{% url 'song:check'%}">
+    <input type="text" name="query" id="query">
+    <label for="class_">搜索：</label>
+    <select id="class_" name="class_">
+        <option value="song">歌曲</option>
+        <option value="artist">歌手</option>
+    </select>
+    <button type="submit">搜索</button>
+</form>
+{% if error_message %}
+    <p>{{ error_message }}</p>
+{% endif %}
+{% if doc_list %}
+    <p>本次搜索用了{{ elapsed_time }}秒</p>
+    <ul>
+        {% for doc in doc_list %}
+            {% if cls == 'song' %}
+                <li><a href="{% url 'song:song_detail' doc.id %}">{{ doc.name }}</a></li>
+            {% else %}
+                <li><a href="{% url 'song:artist_detail' doc.id %}">{{ doc.name }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+{% endif %}

@@ -9,4 +9,5 @@ urlpatterns = [
     path('comment/<int:comment_id>/delete', views.del_comment, name='delete_comment'),
     path('artists/', views.ArtistList.as_view(), name='artist_list'),
     path('artists/<int:pk>/', views.ArtistDetail.as_view(), name='artist_detail'),
+    path('check/', views.check, name='check')
 ]
