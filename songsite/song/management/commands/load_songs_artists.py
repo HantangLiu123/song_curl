@@ -7,19 +7,30 @@ import os
 import re
 
 class Command(BaseCommand):
+
+    """this command is for loading the songs and artists in the data base and construct their relations"""
+
     def add_arguments(self, parser: CommandParser) -> None:
+
+        """arguments of this command"""
+
+        # path to the song information folder, required
         parser.add_argument(
             '--song_info_path',
             type=str,
             required=True,
             help="directory of songs' information",
         )
+
+        # path to the artist information folder, required
         parser.add_argument(
             '--artist_info_path',
             type=str,
             required=True,
             help="directory of artists' information",
         )
+
+        # clear all information before adding new songs/artists
         parser.add_argument(
             '--clear',
             action='store_true',
@@ -27,6 +38,10 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options) -> None: # type: ignore
+
+        """the main function of this command."""
+
+        # get the path of the information
         song_info_dir = options['song_info_path']
         artist_info_dir = options['artist_info_path']
 
@@ -45,8 +60,10 @@ class Command(BaseCommand):
             Song.objects.all().delete()
             Artist.objects.all().delete()
 
-        song_jsons = glob.glob(f"{song_info_dir}/song_intro/*.json")
-        artist_jsons = glob.glob(f"{artist_info_dir}/artist_intro/*.json")
+        # get the files contain the information
+        song_jsons = glob.glob(f"{song_info_dir}/song_intro/*.json") # files of songs
+        artist_jsons = glob.glob(f"{artist_info_dir}/artist_intro/*.json") # files of artists
+        # files of the song ids of each artist
         artist_songs = glob.glob(f"{artist_info_dir}/artist_song_ids/*.json")
 
         if not song_jsons:
@@ -64,23 +81,29 @@ class Command(BaseCommand):
                 self.style.WARNING(f'No jsons in {artist_info_dir}/artist_song_ids')
             )
 
+        # loads all songs in
         for song in song_jsons:
             with open(song, "r", encoding='utf-8') as f:
                 song_data = json.load(f)
             self.process_song_data(song_data)
 
+        # loads all artists in
         for artist in artist_jsons:
             with open(artist, "r", encoding='utf-8') as f:
                 artist_data = json.load(f)
             self.process_artist_data(artist_data)
-            
+
+        # for each artist, link their songs in the site  
         for relation in artist_songs:
             with open(relation, "r", encoding='utf-8') as f:
                 artist_song_relation = json.load(f)
+                # since the file name is in the pattern of 'artist{artist_id}songs', we can
+                # extract the file_name from the full path and then get the artist_id
                 file_name = re.search(r'artist[0-9]+songs', relation).group(0)
                 artist_org_id = file_name[len('artist'):len(file_name) - len('songs')]
             self.add_songs_to_artist(artist_song_relation, artist_org_id)
 
+        # for each song, link their artists in the site
         for song in song_jsons:
             with open(song, "r", encoding='utf-8') as f:
                 song_data = json.load(f)
