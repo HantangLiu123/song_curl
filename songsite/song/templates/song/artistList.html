@@ -1,44 +1,88 @@
-<div class="navigation">
-    <a href="{% url 'song:song_list' %}">歌曲</a>
-    <a href="{% url 'song:artist_list' %}">歌手</a>
-    <a href="{% url 'song:check' %}">搜索</a>
-</div>
-{% if all_artists_list %}
-    <ul>
-        {% for artist in all_artists_list %}
-            <li><a href="{% url 'song:artist_detail' artist.id %}">{{ artist.name }}</a></li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No artists</p>
-{% endif %}
+<!DOCTYPE html>
+{% load static %}
+<html lang="zh-CN">
+<header>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歌手列表</title>
+    <link rel="stylesheet" href="{% static 'song/css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'song/css/artistcard.css' %}">
+</header>
+<body>
+    <nav class="navbar">
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'song:song_list' %}">歌曲</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-active-link" href="{% url 'song:artist_list' %}">歌手</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'song:check' %}">搜索</a>
+            </li>
+        </ul>
+    </nav>
+    <div class="artist-list">
+        {% if all_artists_list %}
+            <ul class="artist-menu">
+                {% for artist in all_artists_list %}
+                    <li class="artist-item">
+                        <fieldset class="artist-fieldset">
+                            <legend class="artist-legend">
+                                <a href="{% url 'song:artist_detail' artist.id %}">{{ artist.name }}</a>
+                            </legend>
+                            <div class="artist-content">
+                                <div class="artist-image">
+                                    <a href="{% url 'song:artist_detail' artist.id %}">
+                                        {% with 'song/images/artist'|add:artist.original_id|add:'.jpg' as image_path %}
+                                        <img src="{% static image_path %}"
+                                            alt="歌手图片"
+                                            class="artist-photo"
+                                        >
+                                        {% endwith %}
+                                    </a>
+                                </div>
 
-<div class="pagination">
-    <span class="step-links">
-        {% if page_obj.has_previous %}
-            <a href="?page=1">&laquo; 首页</a>
-            <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+                                <div class="artist-intro">
+                                    <p>{{ artist.intro|truncatechars:100 }}</p>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No artists</p>
         {% endif %}
+    </div>
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; 首页</a>
+                <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+            {% endif %}
 
-        <span class="current">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">下一页</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">尾页 &raquo;</a>
+            {% endif %}
+
+            <form method="get">
+                <input
+                    type="number"
+                    name="page"
+                    min="1"
+                    max="{{ page_obj.pagination.num_pages }}"
+                    placeholder="页码"
+                    required
+                >
+                <button type="submit">跳转</button>
+            </form>
         </span>
-
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">下一页</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}">尾页 &raquo;</a>
-        {% endif %}
-
-        <form method="get">
-            <input
-                type="number"
-                name="page"
-                min="1"
-                max="{{ page_obj.pagination.num_pages }}"
-                placeholder="页码"
-                required
-            >
-            <button type="submit">跳转</button>
-        </form>
-    </span>
-</div>
+    </div>
+</body>
+</html>

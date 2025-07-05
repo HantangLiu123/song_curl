@@ -1,0 +1,33 @@
+/* a navbar stick to the top of the page */
+.navbar {
+    background-color: #234375;
+    padding: 1rem 0; 
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* a list in a row with no 'point' before each item */
+.nav-menu {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-item {
+    margin-left: 2rem;
+}
+
+/* white text without underline for normal nav item */
+.nav-link {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+/* light blue text without underline for active nav item */
+.nav-active-link {
+    color: #8be2f0;
+    text-decoration: none;
+}

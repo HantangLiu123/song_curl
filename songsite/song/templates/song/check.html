@@ -1,30 +1,51 @@
-<div class="navigation">
-    <a href="{% url 'song:song_list' %}">歌曲</a>
-    <a href="{% url 'song:artist_list' %}">歌手</a>
-    <a href="{% url 'song:check' %}">搜索</a>
-</div>
-<h1>搜索一下</h1>
-<form method="get" action="{% url 'song:check'%}">
-    <input type="text" name="query" id="query">
-    <label for="class_">搜索：</label>
-    <select id="class_" name="class_">
-        <option value="song">歌曲</option>
-        <option value="artist">歌手</option>
-    </select>
-    <button type="submit">搜索</button>
-</form>
-{% if error_message %}
-    <p>{{ error_message }}</p>
-{% endif %}
-{% if doc_list %}
-    <p>本次搜索用了{{ elapsed_time }}秒</p>
-    <ul>
-        {% for doc in doc_list %}
-            {% if cls == 'song' %}
-                <li><a href="{% url 'song:song_detail' doc.id %}">{{ doc.name }}</a></li>
-            {% else %}
-                <li><a href="{% url 'song:artist_detail' doc.id %}">{{ doc.name }}</a></li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-{% endif %}
+<!DOCTYPE html>
+{% load static %}
+<html lang="zh-CN">
+<header>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索</title>
+    <link rel="stylesheet" href="{% static 'song/css/navbar.css' %}">
+</header>
+<body>
+    <nav class="navbar">
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'song:song_list' %}">歌曲</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'song:artist_list' %}">歌手</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-active-link" href="{% url 'song:check' %}">搜索</a>
+            </li>
+        </ul>
+    </nav>
+    <h1>搜索一下</h1>
+    <form method="get" action="{% url 'song:check'%}">
+        {% csrf_token %}
+        <input type="text" name="query" id="query">
+        <label for="class_">搜索：</label>
+        <select id="class_" name="class_">
+            <option value="song">歌曲</option>
+            <option value="artist">歌手</option>
+        </select>
+        <button type="submit">搜索</button>
+    </form>
+    {% if error_message %}
+        <p>{{ error_message }}</p>
+    {% endif %}
+    {% if doc_list %}
+        <p>本次搜索用了{{ elapsed_time }}秒</p>
+        <ul>
+            {% for doc in doc_list %}
+                {% if cls == 'song' %}
+                    <li><a href="{% url 'song:song_detail' doc.id %}">{{ doc.name }}</a></li>
+                {% else %}
+                    <li><a href="{% url 'song:artist_detail' doc.id %}">{{ doc.name }}</a></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>

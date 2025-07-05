@@ -1,0 +1,30 @@
+.artist-name {
+    color: #234375;
+}
+
+.artist-alias {
+    color:dimgrey;
+}
+
+.artist-image-block {
+    text-align: center;
+}
+
+/* put this field block on the center, and use its 
+max width to control the max width of the field set */
+.artist-fieldblock {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.artist-fieldset {
+    border: none;
+    width: 70%;
+    padding: 20px;
+    margin: 0 auto;
+}
+
+.artist-block-header {
+    color:#234375;
+}
+

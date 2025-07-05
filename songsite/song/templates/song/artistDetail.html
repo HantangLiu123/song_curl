@@ -1,64 +1,99 @@
-<div class="navigation">
-    <a href="{% url 'song:song_list' %}">歌曲</a>
-    <a href="{% url 'song:artist_list' %}">歌手</a>
-    <a href="{% url 'song:check' %}">搜索</a>
-</div>
-<h1>{{ artist.name }}</h1>
-{% if artist.alias %}
-    <h3>又名：{{ artist.alias }}</h3>
-{% endif %}
-<p><a href="{{ artist.original_url }}">原网站地址</a></p>
+<!DOCTYPE html>
 {% load static %}
-{% with 'song/images/artist'|add:artist.original_id|add:'.jpg' as image_path %}
-    <img src="{% static image_path %}" alt="歌手图片">
-{% endwith %}
-<fieldset>
-    <legend><h2>歌手简介</h2></legend>
-    <p>{{ artist.intro }}</p>
-</fieldset>
-{% if artist.history %}
-    <fieldset>
-        <legend><h2>演艺生涯</h2></legend>
-        <p>{{ artist.history }}</p>
-    </fieldset>
-{% endif %}
-{% if artist.master_work %}
-    <fieldset>
-        <legend><h2>代表作品</h2></legend>
-        {% if artist.master_work|length == 1 %}
-            <p>{{ artist.master_work.0 }}</p>
-        {% else %}
-            <ul>
-                {% for work in artist.master_work %}
-                    <li>{{ work }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </fieldset>
-{% endif %}
-{% if artist.milestones %}
-    <fieldset>
-        <legend><h2>里程碑</h2></legend>
-        {% if artist.milestones|length == 1 %}
-            <p>{{ artist.milestones.0 }}</p>
-        {% else %}
-            <ul>
-                {% for milestone in artist.milestones %}
-                    <li>{{ milestone }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </fieldset>
-{% endif %}
-<fieldset>
-    <legend><h2>站内歌曲</h2></legend>
-    {% if artist.song_set.all %}
-        <ul>
-            {% for song in artist.song_set.all %}
-                <li><a href="{% url 'song:song_detail' song.id %}">{{ song.name }}</a></li>
-            {% endfor %}
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ artist.name }}详情</title>
+    <link rel="stylesheet" href="{% static 'song/css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'song/css/artistdetail.css' %}">
+</head>
+<body>
+    <nav class="navbar">
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'song:song_list' %}">歌曲</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-active-link" href="{% url 'song:artist_list' %}">歌手</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'song:check' %}">搜索</a>
+            </li>
         </ul>
-    {% else %}
-        <p>暂无歌曲</p>
-    {% endif %}
-</fieldset>
+    </nav>
+
+    <div class="artist-info">
+        <h1 class="artist-name">{{ artist.name }}</h1>
+        {% if artist.alias %}
+            <h3 class="artist-alias">又名：{{ artist.alias }}</h3>
+        {% endif %}
+        <p><a href="{{ artist.original_url }}">原网站地址</a></p>
+        {% with 'song/images/artist'|add:artist.original_id|add:'.jpg' as image_path %}
+        <div class="artist-image-block">
+            <img src="{% static image_path %}" alt="歌手图片" class="artist-image">
+        </div>
+        {% endwith %}
+        <div class="artist-fieldblock">
+            <fieldset class="artist-fieldset">
+                <legend><h2 class="artist-block-header">歌手简介</h2></legend>
+                <p>{{ artist.intro }}</p>
+            </fieldset>
+        </div>
+        {% if artist.history %}
+            <div class="artist-fieldblock">
+                <fieldset class="artist-fieldset">
+                    <legend><h2 class="artist-block-header">演艺生涯</h2></legend>
+                    <p>{{ artist.history }}</p>
+                </fieldset>
+            </div>
+        {% endif %}
+        {% if artist.master_work %}
+            <div class="artist-fieldblock">
+                <fieldset class="artist-fieldset">
+                    <legend><h2 class="artist-block-header">代表作品</h2></legend>
+                    {% if artist.master_work|length == 1 %}
+                        <p>{{ artist.master_work.0 }}</p>
+                    {% else %}
+                        <ul>
+                            {% for work in artist.master_work %}
+                                <li>{{ work }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </fieldset>
+            </div>
+        {% endif %}
+        {% if artist.milestones %}
+            <div class="artist-fieldblock">
+                <fieldset class="artist-fieldset">
+                    <legend><h2 class="artist-block-header">里程碑</h2></legend>
+                    {% if artist.milestones|length == 1 %}
+                        <p>{{ artist.milestones.0 }}</p>
+                    {% else %}
+                        <ul>
+                            {% for milestone in artist.milestones %}
+                                <li>{{ milestone }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </fieldset>
+            </div>
+        {% endif %}
+        <div class="artist-fieldblock">
+            <fieldset class="artist-fieldset">
+                <legend><h2 class="artist-block-header">站内歌曲</h2></legend>
+                {% if artist.song_set.all %}
+                    <ul>
+                        {% for song in artist.song_set.all %}
+                            <li><a href="{% url 'song:song_detail' song.id %}">{{ song.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>暂无歌曲</p>
+                {% endif %}
+            </fieldset>
+        </div>
+    </div>
+</body>
+</html>

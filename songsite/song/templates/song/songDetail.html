@@ -1,52 +1,71 @@
-<div class="navigation">
-    <a href="{% url 'song:song_list' %}">歌曲</a>
-    <a href="{% url 'song:artist_list' %}">歌手</a>
-    <a href="{% url 'song:check' %}">搜索</a>
-</div>
-<h1>{{ song.name }}</h1>
-{% if song.alias %}
-    <h3>又名{{ song.alias }}</h3>
-{% endif %}
-<p>歌手：</p>
-<ul>
-    {% for artist in song.artist.all %}
-        {% if artist.original_url %}
-            <li><a href="{% url 'song:artist_detail' artist.id %}">{{ artist.name }}</a></li>
-        {% else %}
-            <li>{{ artist.name }}</li>
-        {% endif %}
-    {% endfor %}
-</ul>
-<p><a href="{{ song.original_url }}">原歌曲网站</a></p>
+<!DOCTYPE html>
 {% load static %}
-{% with 'song/images/song'|add:song.original_id|add:'.jpg' as image_path %}
-    <img src="{% static image_path %}" alt="歌曲图片">
-{% endwith %}
-<p>歌词：</p>
-{{ song.lyrics|safe }}
-<p>评论：</p>
-{% if comments %}
-    {% for comment in comments %}
-        <fieldset>
-            <legend><h4>{{ comment.user }}</h4></legend>
-            <p>发布时间：{{ comment.pub_date }}</p>
-            <p>内容：{{ comment.comment_text }}</p>
-            <form method="post" action="{% url 'song:delete_comment' comment.id %}">
-                {% csrf_token %}
-                <input type="hidden" name="song_id" value="{{ song.id }}">
-                <input type="submit" value="删除">
-            </form>
-        </fieldset>
-    {% endfor %}
-{% else %}
-<p>暂无评论</p>
-{% endif %}
-<form action="{% url 'song:song_comment' song.id %}" method="post">
-    {% csrf_token %}
-    {% if error_message %}
-        {{ error_message }}
+<html lang="zh-CN">
+<header>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ song.name }}详情</title>
+    <link rel="stylesheet" href="{% static 'song/css/navbar.css' %}">
+</header>
+<body>
+    <nav class="navbar">
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a class="nav-active-link" href="{% url 'song:song_list' %}">歌曲</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'song:artist_list' %}">歌手</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'song:check' %}">搜索</a>
+            </li>
+        </ul>
+    </nav>
+    <h1>{{ song.name }}</h1>
+    {% if song.alias %}
+        <h3>又名{{ song.alias }}</h3>
     {% endif %}
-    用户名: <input type="text" name="user">
-    内容：<input type="text" name="comment_text">
-    <input type="submit" value="提交">
-</form>
+    <p>歌手：</p>
+    <ul>
+        {% for artist in song.artist.all %}
+            {% if artist.original_url %}
+                <li><a href="{% url 'song:artist_detail' artist.id %}">{{ artist.name }}</a></li>
+            {% else %}
+                <li>{{ artist.name }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    <p><a href="{{ song.original_url }}">原歌曲网站</a></p>
+    {% with 'song/images/song'|add:song.original_id|add:'.jpg' as image_path %}
+        <img src="{% static image_path %}" alt="歌曲图片">
+    {% endwith %}
+    <p>歌词：</p>
+    {{ song.lyrics|safe }}
+    <p>评论：</p>
+    {% if comments %}
+        {% for comment in comments %}
+            <fieldset>
+                <legend><h4>{{ comment.user }}</h4></legend>
+                <p>发布时间：{{ comment.pub_date }}</p>
+                <p>内容：{{ comment.comment_text }}</p>
+                <form method="post" action="{% url 'song:delete_comment' comment.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="song_id" value="{{ song.id }}">
+                    <input type="submit" value="删除">
+                </form>
+            </fieldset>
+        {% endfor %}
+    {% else %}
+    <p>暂无评论</p>
+    {% endif %}
+    <form action="{% url 'song:song_comment' song.id %}" method="post">
+        {% csrf_token %}
+        {% if error_message %}
+            {{ error_message }}
+        {% endif %}
+        用户名: <input type="text" name="user">
+        内容：<input type="text" name="comment_text">
+        <input type="submit" value="提交">
+    </form>
+</body>
+</html>

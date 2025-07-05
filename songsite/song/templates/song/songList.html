@@ -1,44 +1,64 @@
-<div class="navigation">
-    <a href="{% url 'song:song_list' %}">歌曲</a>
-    <a href="{% url 'song:artist_list' %}">歌手</a>
-    <a href="{% url 'song:check' %}">搜索</a>
-</div>
-{% if all_songs_list %}
-    <ul>
-        {% for song in all_songs_list %}
-            <li><a href="{% url 'song:song_detail' song.id %}">{{ song.name }}</a></li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No songs</p>
-{% endif %}
+<!DOCTYPE html>
+{% load static %}
+<html lang="zh-CN">
+<header>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歌曲列表</title>
+    <link rel="stylesheet" href="{% static 'song/css/navbar.css' %}">
+</header>
+<body>
+    <nav class="navbar">
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a class="nav-active-link" href="{% url 'song:song_list' %}">歌曲</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'song:artist_list' %}">歌手</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'song:check' %}">搜索</a>
+            </li>
+        </ul>
+    </nav>
+    {% if all_songs_list %}
+        <ul>
+            {% for song in all_songs_list %}
+                <li><a href="{% url 'song:song_detail' song.id %}">{{ song.name }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No songs</p>
+    {% endif %}
 
-<div class="pagination">
-    <span class="step-links">
-        {% if page_obj.has_previous %}
-            <a href="?page=1">&laquo; 首页</a>
-            <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
-        {% endif %}
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; 首页</a>
+                <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+            {% endif %}
 
-        <span class="current">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">下一页</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">尾页 &raquo;</a>
+            {% endif %}
+
+            <form method="get">
+                <input
+                    type="number"
+                    name="page"
+                    min="1"
+                    max="{{ page_obj.pagination.num_pages }}"
+                    placeholder="页码"
+                    required
+                >
+                <button type="submit">跳转</button>
+            </form>
         </span>
-
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">下一页</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}">尾页 &raquo;</a>
-        {% endif %}
-
-        <form method="get">
-            <input
-                type="number"
-                name="page"
-                min="1"
-                max="{{ page_obj.pagination.num_pages }}"
-                placeholder="页码"
-                required
-            >
-            <button type="submit">跳转</button>
-        </form>
-    </span>
-</div>
+    </div>
+</body>
+</html>
