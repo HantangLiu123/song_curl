@@ -1,3 +1,8 @@
+<div class="navigation">
+    <a href="{% url 'song:song_list' %}">歌曲</a>
+    <a href="{% url 'song:artist_list' %}">歌手</a>
+    <a href="{% url 'song:check' %}">搜索</a>
+</div>
 <h1>搜索一下</h1>
 <form method="get" action="{% url 'song:check'%}">
     <input type="text" name="query" id="query">

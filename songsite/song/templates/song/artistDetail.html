@@ -1,6 +1,7 @@
 <div class="navigation">
     <a href="{% url 'song:song_list' %}">歌曲</a>
     <a href="{% url 'song:artist_list' %}">歌手</a>
+    <a href="{% url 'song:check' %}">搜索</a>
 </div>
 <h1>{{ artist.name }}</h1>
 {% if artist.alias %}
