@@ -63,7 +63,7 @@
             {% endif %}
 
             <span class="current">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                第{{ page_obj.number }}页，共{{ page_obj.paginator.num_pages }}页
             </span>
 
             {% if page_obj.has_next %}

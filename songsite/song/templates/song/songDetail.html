@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ song.name }}详情</title>
     <link rel="stylesheet" href="{% static 'song/css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'song/css/songdetail.css' %}">
+    <link rel="stylesheet" href="{% static 'song/css/comment.css' %}">
 </header>
 <body>
     <nav class="navbar">
@@ -21,50 +23,62 @@
             </li>
         </ul>
     </nav>
-    <h1>{{ song.name }}</h1>
-    {% if song.alias %}
-        <h3>又名{{ song.alias }}</h3>
-    {% endif %}
-    <p>歌手：</p>
-    <ul>
-        {% for artist in song.artist.all %}
-            {% if artist.original_url %}
-                <li><a href="{% url 'song:artist_detail' artist.id %}">{{ artist.name }}</a></li>
-            {% else %}
-                <li>{{ artist.name }}</li>
+    <div class="song-intro">
+        <div class="song-introtext">
+            <h1 class="song-name">{{ song.name }}</h1>
+            {% if song.alias %}
+                <h3 class="song-alias">{{ song.alias }}</h3>
             {% endif %}
-        {% endfor %}
-    </ul>
-    <p><a href="{{ song.original_url }}">原歌曲网站</a></p>
-    {% with 'song/images/song'|add:song.original_id|add:'.jpg' as image_path %}
-        <img src="{% static image_path %}" alt="歌曲图片">
-    {% endwith %}
-    <p>歌词：</p>
-    {{ song.lyrics|safe }}
-    <p>评论：</p>
-    {% if comments %}
-        {% for comment in comments %}
-            <fieldset>
-                <legend><h4>{{ comment.user }}</h4></legend>
-                <p>发布时间：{{ comment.pub_date }}</p>
-                <p>内容：{{ comment.comment_text }}</p>
-                <form method="post" action="{% url 'song:delete_comment' comment.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="song_id" value="{{ song.id }}">
-                    <input type="submit" value="删除">
-                </form>
-            </fieldset>
-        {% endfor %}
-    {% else %}
-    <p>暂无评论</p>
-    {% endif %}
-    <form action="{% url 'song:song_comment' song.id %}" method="post">
+            <p>歌手：</p>
+            <ul class="song-artists">
+                {% for artist in song.artist.all %}
+                    {% if artist.original_url %}
+                        <li class="song-artist"><a href="{% url 'song:artist_detail' artist.id %}">{{ artist.name }}</a></li>
+                    {% else %}
+                        <li class="song-artist">{{ artist.name }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <p><a href="{{ song.original_url }}">原歌曲网站</a></p>
+        </div>
+        <div class="song-image">
+            {% with 'song/images/song'|add:song.original_id|add:'.jpg' as image_path %}
+                <img src="{% static image_path %}" alt="歌曲图片">
+            {% endwith %}
+        </div>
+    </div>
+    <div class="song-lyrics">
+        <p>歌词：</p>
+        {{ song.lyrics|safe }}
+    </div>
+    <div class="comment">
+        <p class="comment-title">评论：</p>
+        {% if comments %}
+            <div class="comment-list">
+                {% for comment in comments %}
+                    <fieldset class="comment-fieldset">
+                        <legend><h2>{{ comment.user }}</h2></legend>
+                        <p class="comment-pubtime">发布时间：{{ comment.pub_date }}</p>
+                        <p>内容：{{ comment.comment_text }}</p>
+                        <form method="post" action="{% url 'song:delete_comment' comment.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="song_id" value="{{ song.id }}">
+                            <input type="submit" value="删除">
+                        </form>
+                    </fieldset>
+                {% endfor %}
+            </div>
+        {% else %}
+        <p>暂无评论</p>
+        {% endif %}
+    </div>
+    <form action="{% url 'song:song_comment' song.id %}" method="post" class="input-form">
         {% csrf_token %}
         {% if error_message %}
             {{ error_message }}
         {% endif %}
         用户名: <input type="text" name="user">
-        内容：<input type="text" name="comment_text">
+        内容：<input type="text" name="comment_text" class="input-content">
         <input type="submit" value="提交">
     </form>
 </body>

@@ -1,5 +1,12 @@
+.artist-list {
+    text-align: center;
+}
+
 .artist-menu {
     list-style: none;
+    display: inline-block;
+    text-align: left;
+    padding: 0;
 }
 
 .artist-item {
@@ -7,7 +14,7 @@
 }
 
 .artist-fieldset {
-    max-width: 600px;
+    max-width: 800px;
     border: none;
 }
 

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>歌曲列表</title>
     <link rel="stylesheet" href="{% static 'song/css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'song/css/songcard.css' %}">
 </header>
 <body>
     <nav class="navbar">
@@ -21,16 +22,43 @@
             </li>
         </ul>
     </nav>
-    {% if all_songs_list %}
-        <ul>
-            {% for song in all_songs_list %}
-                <li><a href="{% url 'song:song_detail' song.id %}">{{ song.name }}</a></li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No songs</p>
-    {% endif %}
+    <div class="song-list">
+        {% if all_songs_list %}
+            <ul class="song-menu">
+                {% for song in all_songs_list %}
+                    <li class="song-item">
+                        <div class="song-block">
+                            <div class="song-image-component">
+                                {% with 'song/images/song'|add:song.original_id|add:'.jpg' as image_path %}
+                                <a href="{% url 'song:song_detail' song.id %}">
+                                    <img
+                                        src="{% static image_path %}"
+                                        alt="歌曲图片"
+                                        class="song-image"
+                                    >
+                                </a>
+                                {% endwith %}
+                            </div>
 
+                            <div class="song-intro">
+                                <h2 class="song-name">
+                                    <a href="{% url 'song:song_detail' song.id %}">{{ song.name }}</a>
+                                </h2>
+                                <p>歌手：</p>
+                                <ul class="song-artists">
+                                    {% for artist in song.artist.all %}
+                                        <li class="song-artist">{{ artist.name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No songs</p>
+        {% endif %}
+    </div>
     <div class="pagination">
         <span class="step-links">
             {% if page_obj.has_previous %}
@@ -39,7 +67,7 @@
             {% endif %}
 
             <span class="current">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                第{{ page_obj.number }}页，共{{ page_obj.paginator.num_pages }}页
             </span>
 
             {% if page_obj.has_next %}

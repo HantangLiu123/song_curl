@@ -1,0 +1,31 @@
+.song-intro {
+    margin:0 auto;
+    max-width: 800px;
+    display: flex;
+    align-items: center;
+    gap: clamp(20px, 20px + 35vw, 500px)
+}
+
+.song-name {
+    color: #234375;
+}
+
+.song-alias {
+    color: dimgray;
+}
+
+.song-artists {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.song-artist {
+    display: inline;
+    margin-right: 1em;
+}
+
+.song-lyrics {
+    margin: 10 auto;
+    text-align: center;
+}

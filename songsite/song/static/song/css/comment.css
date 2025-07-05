@@ -1,0 +1,32 @@
+.comment-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.comment-fieldset {
+    width: 100%;
+    max-width: 800px;
+    border: none;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.comment-pubtime {
+    color: dimgray;
+}
+
+.comment-fieldset p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+.input-form {
+    max-width: 800px;
+}
+
+.input-content {
+    width: 80%;
+}
