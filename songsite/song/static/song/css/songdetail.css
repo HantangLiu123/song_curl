@@ -1,9 +1,15 @@
 .song-intro {
-    margin:0 auto;
+    margin: 0 auto;
     max-width: 800px;
     display: flex;
     align-items: center;
-    gap: clamp(20px, 20px + 35vw, 500px)
+    gap: 20px;
+}
+
+.song-introtext {
+    flex: 2;
+    min-width: 0; /* Important for flex items with text */
+    margin-left: 0; /* Remove the old margin */
 }
 
 .song-name {
@@ -23,6 +29,17 @@
 .song-artist {
     display: inline;
     margin-right: 1em;
+}
+
+.song-image {
+    flex: 0 0 200px; /* flex-grow: 0, flex-shrink: 0, flex-basis: 200px */
+    margin-right: 0; /* Remove the old margin */
+}
+
+.song-image img {
+    width: 100%;
+    height: auto;
+    display: block;
 }
 
 .song-lyrics {
