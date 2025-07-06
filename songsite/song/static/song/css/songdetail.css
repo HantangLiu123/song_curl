@@ -9,7 +9,7 @@
 .song-introtext {
     flex: 2;
     min-width: 0; /* Important for flex items with text */
-    margin-left: 0; /* Remove the old margin */
+    margin-left: 0; 
 }
 
 .song-name {
