@@ -26,7 +26,6 @@
     <div class="search-block">
         <h1 class="search-header">搜索一下</h1>
         <form method="get" action="{% url 'song:check'%}">
-            {% csrf_token %}
             <input type="text" name="query" id="query" class="query">
             <label for="class_">搜索：</label>
             <select id="class_" name="class_">
