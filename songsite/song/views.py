@@ -4,12 +4,16 @@ from django.db.models import Case, When
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
+from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from .models import Song, Artist, Comment, SongSegment, SongIndex, ArtistSegment, ArtistIndex
 import jieba
 import math
 import time
+import hashlib
+import json
 
 # Create your views here.
 
@@ -178,6 +182,8 @@ def check(request):
 
     query = request.GET.get('query')
     class_ = request.GET.get('class_')
+    page_number = request.GET.get('page', 1)
+
     start_time = time.time() # record the start time
     if query is None and class_ is None:
         # this happens when the user first goes to the search url, so no information is sent to 
@@ -203,88 +209,111 @@ def check(request):
         )
     else:
         # the request is complete
-        query_seg = jieba.cut_for_search(query)
-        found_doc = False # a flag for whether there is doc found
-        tfidf_list = [] # the tfidf for each token in each doc
 
-        def get_score(tfidf_list: list[dict[int, float]]) -> dict[int, float]:
+        # generate a unique cache key for the search
+        cache_key = f"search_{hashlib.md5(f'{query}_{class_}'.encode()).hexdigest()}"
+        cached_results = cache.get(cache_key)
 
-            """the tfidf to doc score convert function.
-
-            This function converts the tfidf for each token in each doc into the scores of
-            each doc got on this query.
-
-            Args:
-                tfidf_list (list[dict[int, float]]):
-                    the tfidf for each token in each doc. The list is for each token. In each dictionary,
-                    the int part is the doc_num, and the float part is the tfidf value.
-
-            Returns:
-                score (dict[int, float]): the score of each_doc on this query.
-            """
-
-            score = {}
-            # adding the score of each doc on all tokens together
-            for tfidf in tfidf_list:
-                for doc_id in tfidf:
-                    if doc_id in score:
-                        score[doc_id] += tfidf[doc_id]
-                    else:
-                        score[doc_id] = tfidf[doc_id]
-            return score
-
-        if class_ == 'song':
-            # client chose to search on songs, the total number should be the total number
-            # of songs.
-            N = Song.objects.count()
-            for seg in query_seg:
-                try:
-                    song_seg = SongSegment.objects.get(token=seg)
-                except SongSegment.DoesNotExist:
-                    # the segment is not in the index, continue to next
-                    continue
-                else:
-                    # found the segment, calculate the tfidf for this segment/token in each
-                    # document, and append this dict to the tfidf_list
-                    if not found_doc:
-                        found_doc = True
-                    index_set = song_seg.songindex_set.all()
-                    idf = math.log(N / song_seg.df)
-                    tfidf = {}
-                    for index in index_set:
-                        tfidf[index.article_id] = index.tf * idf
-                    tfidf_list.append(tfidf)
+        if cached_results:
+            # the results are in the cache, no need to search again
+            doc_id_list = cached_results['doc_id_list']
+            elapsed_time = cached_results['elapsed_time']
+            start_time = time.time() # pagination time
         else:
-            # the client chose to search on artists, the total number of doc should be the 
-            # total number of complete artists (who have intros, urls...)
-            N = Artist.objects.filter(original_url__isnull=False).count()
-            for seg in query_seg:
-                try:
-                    artist_seg = ArtistSegment.objects.get(token=seg)
-                except ArtistSegment.DoesNotExist:
-                    # the segment is not in the index, continue to next
-                    continue
-                else:
-                    # found the segment, calculate the tfidf for this segment/token in each
-                    # document, and append this dict to the tfidf_list
-                    if not found_doc:
-                        found_doc = True
-                    index_set = artist_seg.artistindex_set.all()
-                    idf = math.log(N / artist_seg.df)
-                    tfidf = {}
-                    for index in index_set:
-                        tfidf[index.article_id] = index.tf * idf
-                    tfidf_list.append(tfidf)
+            query_seg = jieba.cut_for_search(query)
+            found_doc = False # a flag for whether there is doc found
+            tfidf_list = [] # the tfidf for each token in each doc
 
-        # if no doc is found by this query, return a page with an error message
-        if not found_doc:
-            return render(
-                request,
-                'song/check.html',
-                {
-                    'error_message': "没有结果符合您的问题"
-                }
-            )
+            def get_score(tfidf_list: list[dict[int, float]]) -> dict[int, float]:
+
+                """the tfidf to doc score convert function.
+
+                This function converts the tfidf for each token in each doc into the scores of
+                each doc got on this query.
+
+                Args:
+                    tfidf_list (list[dict[int, float]]):
+                        the tfidf for each token in each doc. The list is for each token. In each dictionary,
+                        the int part is the doc_num, and the float part is the tfidf value.
+
+                Returns:
+                    score (dict[int, float]): the score of each_doc on this query.
+                """
+
+                score = {}
+                # adding the score of each doc on all tokens together
+                for tfidf in tfidf_list:
+                    for doc_id in tfidf:
+                        if doc_id in score:
+                            score[doc_id] += tfidf[doc_id]
+                        else:
+                            score[doc_id] = tfidf[doc_id]
+                return score
+
+            if class_ == 'song':
+                # client chose to search on songs, the total number should be the total number
+                # of songs.
+                N = Song.objects.count()
+                for seg in query_seg:
+                    try:
+                        song_seg = SongSegment.objects.get(token=seg)
+                    except SongSegment.DoesNotExist:
+                        # the segment is not in the index, continue to next
+                        continue
+                    else:
+                        # found the segment, calculate the tfidf for this segment/token in each
+                        # document, and append this dict to the tfidf_list
+                        if not found_doc:
+                            found_doc = True
+                        index_set = song_seg.songindex_set.all()
+                        idf = math.log(N / song_seg.df)
+                        tfidf = {}
+                        for index in index_set:
+                            tfidf[index.article_id] = index.tf * idf
+                        tfidf_list.append(tfidf)
+            else:
+                # the client chose to search on artists, the total number of doc should be the 
+                # total number of complete artists (who have intros, urls...)
+                N = Artist.objects.filter(original_url__isnull=False).count()
+                for seg in query_seg:
+                    try:
+                        artist_seg = ArtistSegment.objects.get(token=seg)
+                    except ArtistSegment.DoesNotExist:
+                        # the segment is not in the index, continue to next
+                        continue
+                    else:
+                        # found the segment, calculate the tfidf for this segment/token in each
+                        # document, and append this dict to the tfidf_list
+                        if not found_doc:
+                            found_doc = True
+                        index_set = artist_seg.artistindex_set.all()
+                        idf = math.log(N / artist_seg.df)
+                        tfidf = {}
+                        for index in index_set:
+                            tfidf[index.article_id] = index.tf * idf
+                        tfidf_list.append(tfidf)
+
+            # if no doc is found by this query, return a page with an error message
+            if not found_doc:
+                return render(
+                    request,
+                    'song/check.html',
+                    {
+                        'error_message': "没有结果符合您的问题"
+                    }
+                )
+            
+            # get the score, then the doc_id_list, and the elapsed time
+            score = get_score(tfidf_list)
+            doc_id_list = sorted(score, key=lambda x: score[x], reverse=True)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+
+            # caches for 10 minutes
+            cache.set(cache_key, {
+                'doc_id_list': doc_id_list,
+                'elapsed_time': elapsed_time,
+            }, 600)
         
         def get_doc_list(cls, doc_id_list: list[int]) -> Any:
 
@@ -307,23 +336,31 @@ def check(request):
             preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(doc_id_list)])
             return cls.objects.filter(id__in=doc_id_list).order_by(preserved)
         
-        # get the score, then the doc_id_list, then the doc_list, and lastly the time used of the
-        # search process
-        score = get_score(tfidf_list)
-        doc_id_list = sorted(score, key=lambda x: score[x], reverse=True)
+        
         if class_ == 'song':
             doc_list = get_doc_list(Song, doc_id_list)
         else:
             doc_list = get_doc_list(Artist, doc_id_list)
-        end_time = time.time()
-        elapsed_time = end_time - start_time
+        
+        # paginator
+        paginator = Paginator(doc_list, 20)
+        page_obj = paginator.get_page(page_number)
+
+        # calculate the true elapsed time: search time + pagination time (if page is flipped)
+        if cached_results:
+            pagination_time = time.time() - start_time
+            total_time = f"{(elapsed_time + pagination_time):.3f}"
+        else:
+            total_time = f"{elapsed_time:.3f}"
 
         return render(
             request,
             'song/check.html',
             {
-                'doc_list': doc_list,
+                'page_obj': page_obj,
                 'elapsed_time': f"{elapsed_time:.3f}",
-                'cls': class_
+                'cls': class_,
+                'query': query,
+                'total_results': len(doc_id_list),
             }
         )

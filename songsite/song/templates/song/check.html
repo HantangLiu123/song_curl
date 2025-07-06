@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>搜索</title>
     <link rel="stylesheet" href="{% static 'song/css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'song/css/search.css' %}">
 </header>
 <body>
     <nav class="navbar">
@@ -21,31 +22,107 @@
             </li>
         </ul>
     </nav>
-    <h1>搜索一下</h1>
-    <form method="get" action="{% url 'song:check'%}">
-        {% csrf_token %}
-        <input type="text" name="query" id="query">
-        <label for="class_">搜索：</label>
-        <select id="class_" name="class_">
-            <option value="song">歌曲</option>
-            <option value="artist">歌手</option>
-        </select>
-        <button type="submit">搜索</button>
-    </form>
-    {% if error_message %}
-        <p>{{ error_message }}</p>
-    {% endif %}
-    {% if doc_list %}
-        <p>本次搜索用了{{ elapsed_time }}秒</p>
-        <ul>
-            {% for doc in doc_list %}
-                {% if cls == 'song' %}
-                    <li><a href="{% url 'song:song_detail' doc.id %}">{{ doc.name }}</a></li>
-                {% else %}
-                    <li><a href="{% url 'song:artist_detail' doc.id %}">{{ doc.name }}</a></li>
+
+    <div class="search-block">
+        <h1 class="search-header">搜索一下</h1>
+        <form method="get" action="{% url 'song:check'%}">
+            {% csrf_token %}
+            <input type="text" name="query" id="query" class="query">
+            <label for="class_">搜索：</label>
+            <select id="class_" name="class_">
+                <option value="song">歌曲</option>
+                <option value="artist">歌手</option>
+            </select>
+            <button type="submit">搜索</button>
+        </form>
+    </div>
+
+    <div class="results">
+        {% if error_message %}
+            <p>{{ error_message }}</p>
+        {% endif %}
+        {% if page_obj %}
+            <p class="explaination">问题“{{ query }}”共有{{ total_results }}个结果</p>
+            <p class="explaination">本次搜索用了{{ elapsed_time }}秒</p>
+            <ul class="result-list">
+                {% for doc in page_obj %}
+                    {% if cls == 'song' %}
+                        <li class="result-item">
+                            <div class="result-image">
+                                <a href="{% url 'song:song_detail' doc.id %}">
+                                    {% with 'song/images/song'|add:doc.original_id|add:'.jpg' as image_path %}
+                                        <img src="{% static image_path %}"
+                                            alt="歌曲图片"
+                                            class="result-picture"
+                                        >
+                                    {% endwith %}
+                                </a>
+                            </div>
+                            <div class="result-name">
+                                <h1><a href="{% url 'song:song_detail' doc.id %}">{{ doc.name }}</a></h1>
+                            </div>
+                        </li>
+                    {% else %}
+                        <li class="result-item">
+                            <div class="result-image">
+                                <a href="{% url 'song:artist_detail' doc.id %}">
+                                    {% with 'song/images/artist'|add:doc.original_id|add:'.jpg' as image_path %}
+                                        <img src="{% static image_path %}"
+                                            alt="歌手图片"
+                                            class="result-picture"
+                                        >
+                                    {% endwith %}
+                                </a>
+                            </div>
+                            <div class="result-name">
+                                <h1><a href="{% url 'song:artist_detail' doc.id %}">{{ doc.name }}</a></h1>
+                            </div>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    {% if page_obj %}
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                    <a href="?query={{ query }}&class_={{ cls }}&page=1">&laquo; 首页</a>
+                    <a href="?query={{ query }}&class_={{ cls }}&page={{ page_obj.previous_page_number }}">上一页</a>
                 {% endif %}
-            {% endfor %}
-        </ul>
+
+                <span class="current">
+                    第{{ page_obj.number }}页，共{{ page_obj.paginator.num_pages }}页
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?query={{ query }}&class_={{ cls }}&page={{ page_obj.next_page_number }}">下一页</a>
+                    <a href="?query={{ query }}&class_={{ cls }}&page={{ page_obj.paginator.num_pages }}">尾页 &raquo;</a>
+                {% endif %}
+
+                <form method="get">
+                    <input
+                        type="number"
+                        name="page"
+                        min="1"
+                        max="{{ page_obj.pagination.num_pages }}"
+                        placeholder="页码"
+                        required
+                    >
+                    <input
+                        type="hidden"
+                        name="query"
+                        value="{{ query }}"
+                    >
+                    <input
+                        type="hidden"
+                        name="class_"
+                        value="{{ cls }}"
+                    >
+                    <button type="submit">跳转</button>
+                </form>
+            </span>
+        </div>
     {% endif %}
 </body>
 </html>

@@ -1,0 +1,59 @@
+body {
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+}
+
+.search-block {
+    max-width: 1000px;
+    margin: 10px auto;
+    align-items: center;
+    text-align: center;
+}
+
+.search-header {
+    color: #234375;
+}
+
+.query {
+    width: 50vw;
+}
+
+.results {
+    max-width: 800px;
+    margin: 10px auto;
+    align-items: center;
+}
+
+.explainations {
+    color: dimgray;
+}
+
+.result-list {
+    list-style: none;
+    width: 100%;
+    display: inline-block;
+    padding: 0;
+}
+
+.result-item {
+    width: 100%;
+    display: flex;
+    gap: 20px;
+}
+
+.result-image {
+    margin-top: 20px;
+    flex-shrink: 0;
+}
+
+.result-picture {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+}
+
+.result-name h1 a {
+    color:#234375;
+    text-decoration: none;
+}
